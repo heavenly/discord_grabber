@@ -57,25 +57,37 @@ fn get_persistence_paths() -> Vec<PathBuf> {
     let app_data = app_data.unwrap();
 
     const POSSIBLE_FOLDERS: [&'static str; 3] = ["Discord", "discordcanary", "discordptb"];
-    const POSSIBLE_VERSIONS: [&'static str; 2] = ["0.0.305", "0.0.306"];
 
     let mut paths: Vec<PathBuf> = Vec::new();
 
+    let folder_regex = Regex::new(r#"(^\d\.\d\.\d{3}$)"#).unwrap();
     for folder in POSSIBLE_FOLDERS.iter() {
-        for version in POSSIBLE_VERSIONS.iter() {
-            let new_path = app_data
-                .join(folder)
-                .join(version)
-                .join("modules")
-                .join("discord_desktop_core");
-            if !new_path.exists() || !new_path.is_dir() {
-                continue;
-            }
+        let new_path = app_data.join(folder);
 
-            paths.push(new_path);
+        if !new_path.exists() || !new_path.is_dir() {
+            continue;
+        }
+
+        let versions = fs::read_dir(&new_path).unwrap();
+        for version in versions {
+            let version_str = version.unwrap().file_name();
+            let version_str = version_str.to_str().unwrap();
+            let is_match = folder_regex.is_match(version_str);
+            if is_match {
+                let new_path_cpy = &new_path
+                    .join(version_str)
+                    .join("modules")
+                    .join("discord_desktop_core");
+                if !new_path_cpy.exists() || !new_path_cpy.is_dir() {
+                    continue;
+                }
+
+                paths.push(new_path_cpy.to_path_buf());
+            }
         }
     }
 
+    println!("{:?}", paths);
     paths
 }
 
