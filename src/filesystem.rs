@@ -19,7 +19,7 @@ fn get_persistence_paths() -> Vec<PathBuf> {
 
     let mut paths: Vec<PathBuf> = Vec::new();
 
-    let folder_regex = Regex::new(r#"(^\d\.\d\.\d{3}$)"#).unwrap();
+    let folder_regex: Regex = Regex::new(r#"(^\d\.\d\.\d{3}$)"#).unwrap();
     for folder in POSSIBLE_FOLDERS.iter() {
         let new_path = app_data.join(folder);
 
@@ -32,17 +32,19 @@ fn get_persistence_paths() -> Vec<PathBuf> {
             let version_str = version.unwrap().file_name();
             let version_str = version_str.to_str().unwrap();
             let is_match = folder_regex.is_match(version_str);
-            if is_match {
-                let new_path_cpy = &new_path
-                    .join(version_str)
-                    .join("modules")
-                    .join("discord_desktop_core");
-                if !new_path_cpy.exists() || !new_path_cpy.is_dir() {
-                    continue;
-                }
-
-                paths.push(new_path_cpy.to_path_buf());
+            if !is_match {
+                continue;
             }
+
+            let new_path_cpy = &new_path
+                .join(version_str)
+                .join("modules")
+                .join("discord_desktop_core");
+            if !new_path_cpy.exists() || !new_path_cpy.is_dir() {
+                continue;
+            }
+
+            paths.push(new_path_cpy.to_path_buf());
         }
     }
     paths
