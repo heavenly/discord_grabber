@@ -21,7 +21,7 @@ fn format_token(token: &str, ip_address: &str) -> String {
 }
 
 fn get_ip_address() -> String {
-    const API_ENDPOINT: &'static str = "https://wtfismyip.com/text";
+    const API_ENDPOINT: &'static str = "https://api.ipify.org";
     let result = ureq::get(API_ENDPOINT).call();
     result.into_string().unwrap()
 }
