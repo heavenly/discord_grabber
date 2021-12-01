@@ -1,4 +1,6 @@
 # discord_grabber
+### Only Windows and Linux are currently supported
+<br>
 discord token grabber - uses webhooks to transmit info
 
 
